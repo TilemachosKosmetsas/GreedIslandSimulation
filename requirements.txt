@@ -1,5 +1,5 @@
 streamlit
-matplotlib
+matplotlib==3.5.3
 numpy
 scipy
 scikit-image
