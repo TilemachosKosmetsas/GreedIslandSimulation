@@ -1,8 +1,6 @@
 import streamlit as st
 import yaml
-import os
 import time
-import pickle
 import matplotlib.pyplot as plt
 
 # Initialize a session state flag for simulation run status
@@ -15,13 +13,26 @@ from savemp4 import (
     save_animation_with_opencv,
 )  # Ensure this file exists in your project
 
-# Load the pre-generated map grid
-with open("map_grid.pkl", "rb") as f:
-    map_grid = pickle.load(f)
+
+# Instead of loading a pickle file, generate and cache the map in memory.
+@st.cache_data(show_spinner=False)
+def get_map():
+    # Lazy import to avoid circular dependency issues.
+    import map
+
+    map.create_island()
+    map.create_irregular_lake()
+    map.create_walls()
+    map.create_forest_clusters()
+    return map.map_grid
+
+
+# Generate the map grid (cached for the session)
+map_grid = get_map()
 
 
 # Load the base configuration
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def load_config():
     with open("config.yaml", "r") as f:
         return yaml.safe_load(f)
@@ -32,9 +43,10 @@ config = load_config()
 st.title("Hunter Simulation")
 st.write(
     """
-                Adjust the parameters on the sidebar (to the left) & press **Run Simulation** to generate the simulation. 
-                
-                When simulation processing is over, download the MP4 video file.
+    Adjust the parameters on the sidebar (to the left) & press **Run Simulation** 
+    at the very bottom! to generate the simulation.
+
+    When simulation processing is over, download the MP4 video file.
     """
 )
 
@@ -209,16 +221,12 @@ death_chance = st.sidebar.slider(
 # -------------------------
 config["simulation"]["num_hunters"] = num_hunters
 config["simulation"]["steps"] = steps
-
 config["map"]["dimensions"]["height_km"] = map_height_km
 config["map"]["dimensions"]["width_km"] = map_width_km
-
 config["map"]["walls"]["num_walls"] = num_walls
 config["map"]["forests"]["num_forests"] = num_forests
-
 config["hunters"]["combat"]["escape_base_chance"] = escape_base_chance
 config["hunters"]["sensing"]["D_max"] = d_max
-
 config["simulation"]["combat"]["death_chance"] = death_chance
 
 # -------------------------
@@ -245,7 +253,6 @@ def compute_statistics(hunters, total_initial_hunters):
     avg_score_total = sum(h.card_score for h in hunters) / total_initial_hunters
     winning_hunters = len([h for h in hunters if h.card_score >= 6])
     ratio = winning_hunters / num_alive if num_alive > 0 else 0
-    # Additional KPI: Average Elo Rating
     avg_elo = sum(h.elo for h in hunters) / num_alive if num_alive > 0 else 0
 
     return {
@@ -264,10 +271,8 @@ def compute_statistics(hunters, total_initial_hunters):
 # RUN SIMULATION WHEN BUTTON PRESSED
 # -------------------------
 if run_sim:
-    # Set the flag so that the description placeholder is hidden in future reruns
     st.session_state.simulation_run = True
-
-    total_steps = 4  # We'll track 4 major steps
+    total_steps = 4
     current_step = 0
 
     # Step 1: Hunter Spawning
@@ -303,20 +308,18 @@ if run_sim:
     progress_bar.progress(100)
     st.success(f"Simulation completed in {simulation_duration:.2f} seconds.")
 
-    # -------------------------
-    # DISPLAY STATISTICS & HISTOGRAM SIDE-BY-SIDE
-    # -------------------------
+    # Display Statistics & Histogram Side-by-Side
     stats = compute_statistics(hunters_list, num_hunters)
     final_elo = [h.elo for h in hunters_list]
-
     col_stats, col_hist = st.columns(2)
     with col_stats:
         st.subheader("Simulation Statistics")
         for key, value in stats.items():
-            if isinstance(value, float):
-                st.write(f"**{key}:** {value:.2f}")
-            else:
-                st.write(f"**{key}:** {value}")
+            st.write(
+                f"**{key}:** {value:.2f}"
+                if isinstance(value, float)
+                else f"**{key}:** {value}"
+            )
     with col_hist:
         st.subheader("Distribution of Elo Ratings")
         fig, ax = plt.subplots()
@@ -326,12 +329,10 @@ if run_sim:
         ax.set_ylabel("Number of Hunters")
         st.pyplot(fig)
 
-    # -------------------------
-    # DOWNLOAD BUTTON CENTERED AT THE BOTTOM
-    # -------------------------
+    # Centered Download Button
     cols = st.columns(3)
     with cols[1]:
-        if os.path.exists(animation_file):
+        try:
             with open(animation_file, "rb") as f:
                 video_bytes = f.read()
             st.download_button(
@@ -340,14 +341,12 @@ if run_sim:
                 file_name=animation_file,
                 mime="video/mp4",
             )
-        else:
+        except Exception as e:
             st.error("Animation file not found.")
 
     progress_text.text("Simulation complete!")
 
-    # -------------------------
-    # DISPLAY BOTTOM-CENTERED IMAGE AFTER SIMULATION
-    # -------------------------
+    # Display Bottom-Centered Image After Simulation
     col_bottom1, col_bottom2, col_bottom3 = st.columns([1, 2, 1])
     with col_bottom2:
-        st.image("pix.png", use_container_width=True)
+        st.image("pix2.png", use_container_width=True)
