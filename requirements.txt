@@ -4,4 +4,4 @@ numpy
 scipy
 scikit-image
 pyyaml
-opencv-python  # if using OpenCV for saving video
+opencv-python-headless
