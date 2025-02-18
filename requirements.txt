@@ -1,0 +1,7 @@
+streamlit
+matplotlib
+numpy
+scipy
+scikit-image
+pyyaml
+opencv-python  # if using OpenCV for saving video

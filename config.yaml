@@ -1,0 +1,147 @@
+# config.yaml
+
+# ================================
+# General Settings
+# ================================
+general:
+  logging:
+    filename: "log.txt" # Log file name
+    filemode: "w" # 'w' to overwrite, 'a' to append
+    level: "WARNING" # Logging level (e.g., DEBUG, INFO, WARNING, ERROR)
+    format: "%(asctime)s - %(levelname)s - %(message)s" # Log format
+
+# ================================
+# Map Configuration
+# ================================
+map:
+  dimensions:
+    height_km: 3 # Map height in kilometers
+    width_km: 7.5 # Map width in kilometers
+    cell_size_m: 10 # Cell size in meters
+
+  visibility:
+    sea: -5 # Visibility modifier for sea
+    land_default: 0 # Default visibility modifier on land
+
+  island:
+    center1:
+      x_ratio: 0.35 # X-coordinate ratio for first circle
+      y_ratio: 0.5 # Y-coordinate ratio for first circle
+    radius1_ratio: 0.35 # Radius ratio for first circle
+
+    center2:
+      x_ratio: 0.65 # X-coordinate ratio for second circle
+      y_ratio: 0.45 # Y-coordinate ratio for second circle
+    radius2_ratio: 0.45 # Radius ratio for second circle
+
+  lake:
+    num_points: 15 # Number of points defining the lake polygon
+    radius_ratio: 0.15 # Base radius ratio for lake
+    radius_variation: 0.5 # Variation factor for lake radius
+    center_x_ratio: 0.4 # X-coordinate ratio for lake center
+    center_y_ratio: 0.5 # Y-coordinate ratio for lake center
+
+  walls:
+    num_walls: 3 # Number of walls to generate
+    length_ratio_min: 0.4 # Minimum wall length ratio relative to grid height
+    length_ratio_max: 0.6 # Maximum wall length ratio relative to grid height
+    thickness_min: 3 # Minimum wall thickness
+    thickness_max: 6 # Maximum wall thickness
+    break_probability: 0.3 # Probability of a wall having a break
+
+  forests:
+    num_forests: 10 # Number of forest clusters
+    radius_ratio_min: 0.15 # Minimum forest radius ratio
+    radius_ratio_max: 0.25 # Maximum forest radius ratio
+    num_points_min: 20 # Minimum number of points for forest polygon
+    num_points_max: 30 # Maximum number of points for forest polygon
+    visibility_increment: 5 # Visibility increment for forests
+    visibility_decay: 5 # Visibility decay factor
+
+# ================================
+# Hunters Configuration
+# ================================
+hunters:
+  grid_cell_size: 50 # Grid cell size for spatial partitioning
+
+  attributes:
+    strength_range: [1, 10] # Range for hunter strength
+    hiding_skill_range: [1, 10] # Range for hiding skill
+    strategy_range: [0, 20] # Range for aggression strategy
+    sensing_range: [1, 10] # Range for sensing ability
+
+  combat:
+    escape_base_chance: 0.2 # Base chance to escape combat
+    escape_distance_threshold_close: 5 # Distance below which escape chance is reduced
+    escape_distance_threshold_far: 50 # Distance above which escape chance is increased
+    escape_chance_modifier_close: 0.5 # Modifier for escape chance when very close
+    escape_chance_modifier_far: 1.2 # Modifier for escape chance when far
+
+  movement:
+    exploration_visibility_threshold: 5 # Visibility threshold to prefer hiding
+    consecutive_fight_reset_chance: 0.33 # Chance to reset fight count with new opponent
+    aggression_factor_max: 20 # Maximum aggression factor
+    aggression_factor_min: 0 # Minimum aggression factor
+    explore_max_range: 10 # Maximum Manhattan distance for exploration targets
+  sensing:
+    D_max: 60 # Maximum sensing range
+    k_base: 0.4 # Base steepness parameter for sensing probability
+    k: 0.09 # Steepness parameter for close combat probability
+    d0_close: 12 # Effective distance for 50% probability in close combat
+
+# ================================
+# Simulation Configuration
+# ================================
+simulation:
+  num_hunters: 50 # Initial number of hunters
+  steps: 500 # Number of simulation steps
+
+  data_storage:
+    simulation_data_file: "simulation_data.pkl" # File to store simulation data
+    map_grid_file: "map_grid.pkl" # File to store map grid data
+
+  combat:
+    death_chance: 0.25 # Chance of a hunter dying after losing combat
+
+# ================================
+# Animation Configuration
+# ================================
+animation:
+  frame_interval_ms: 50 # Interval between frames in milliseconds
+  save_animation: true # Whether to save the animation as a file
+  animation_file: "hunter_simulation.mp4" # File name for saved animation
+
+# ================================
+# Visualization Configuration
+# ================================
+visualization:
+  map_accessibility_cmap: "Greens" # Colormap for map accessibility
+  map_visibility_cmap: "Greens" # Colormap for map visibility modifiers
+  figure_size: [12, 5] # Size of the matplotlib figures
+  hunter_markers:
+    aggressive:
+      color: "red" # Color for aggressive hunters
+      marker: "o" # Marker style for aggressive hunters
+      edgecolor: "black" # Edge color for markers
+      size: 10 # Marker size for aggressive hunters
+    defensive:
+      color: "blue" # Color for defensive hunters
+      marker: "o" # Marker style for defensive hunters
+      edgecolor: "black" # Edge color for markers
+      size: 10 # Marker size for defensive hunters
+  hunter_labels:
+    fontsize: 8 # Font size for hunter ID annotations
+    color: "black" # Font color for hunter ID annotations
+
+# ================================
+# Logging Configuration
+# ================================
+logging:
+  simulation:
+    level: "INFO" # Logging level for simulation
+  hunters:
+    level: "WARNING" # Logging level for hunters
+  map:
+    level: "WARNING" # Logging level for map
+  animation:
+    level: "WARNING" # Logging level for animation
